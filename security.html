@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Team SOC Report - Project 04</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --text-bright: #f0f6fc;
+            --accent-blue: #58a6ff;
+            --accent-cyan: #39c5cf;
+            --high-sev: #f85149;
+            --med-sev: #d29922;
+            --low-sev: #3fb950;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-top: 4px solid var(--accent-blue);
+        }
+
+        .tag {
+            background-color: rgba(88, 166, 255, 0.15);
+            color: var(--accent-blue);
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            color: var(--text-bright);
+            margin: 12px 0 6px 0;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            background-color: #0d1117;
+            padding: 16px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .meta-item span {
+            color: #8b949e;
+        }
+
+        /* Sections */
+        section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            color: var(--text-bright);
+            font-size: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background-color: var(--accent-blue);
+        }
+
+        h3 {
+            color: var(--accent-cyan);
+            font-size: 16px;
+            margin: 16px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #21262d;
+            color: var(--text-bright);
+        }
+
+        code {
+            background-color: rgba(110, 118, 129, 0.2);
+            color: var(--accent-cyan);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        /* Rules Block */
+        .rule-card {
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--accent-blue);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background-color: #0d1117;
+        }
+
+        .rule-title {
+            font-weight: bold;
+            color: var(--text-bright);
+            margin-bottom: 10px;
+        }
+
+        pre {
+            background-color: #161b22;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 12px;
+            color: #79c0ff;
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .justification {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        /* Severity Badges */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .badge-high { background-color: rgba(248, 81, 73, 0.2); color: var(--high-sev); border: 1px solid var(--high-sev); }
+        .badge-med { background-color: rgba(210, 153, 34, 0.2); color: var(--med-sev); border: 1px solid var(--med-sev); }
+        .badge-low { background-color: rgba(63, 185, 80, 0.2); color: var(--low-sev); border: 1px solid var(--low-sev); }
+
+        /* Timeline/Lifecycle */
+        .lifecycle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .step-card {
+            background-color: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .step-num {
+            color: var(--accent-blue);
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        /* Hardening List */
+        .hardening-list {
+            list-style-type: none;
+        }
+
+        .hardening-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .hardening-list li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            color: var(--low-sev);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header Section -->
+    <header>
+        <span class="tag">Blue Team Labs · Project 04</span>
+        <h1>Security Monitoring & Incident Response Report</h1>
+        <p class="subtitle">Comprehensive Threat Analysis, Incident Classification, Detection Rules & Mitigation Framework</p>
+        
+        <div class="meta-grid">
+            <div class="meta-item"><span>Document Version:</span> 1.0</div>
+            <div class="meta-item"><span>Prepared By:</span> SOC Analyst (Blue Team)</div>
+            <div class="meta-item"><span>Classification:</span> Confidential / Internal Use</div>
+            <div class="meta-item"><span>Status:</span> Completed Investigation</div>
+        </div>
+    </header>
+
+    <!-- 1. Executive Summary -->
+    <section>
+        <h2>1. Executive Summary & Objective</h2>
+        <p>This Incident Response Report documents the security investigation performed for <strong>Project 04: Security Monitoring & Incident Response</strong>. Security Operations Centers (SOC) continuously monitor organizational infrastructure to identify malicious activities hidden within legitimate system noise.</p>
+        <p>The objective of this analysis is to evaluate system access logs, differentiate normal operational baseline activity from suspicious anomalies, construct robust detection rules (SIGMA/SIEM pseudo-logic), classify security incidents based on severity metrics, and provide structured remediation workflows based on industry frameworks (NIST SP 800-61 / ISO 27035).</p>
+    </section>
+
+    <!-- 2. Log Analysis -->
+    <section>
+        <h2>2. Log Analysis & Anomalies Identified</h2>
+        <p>During the log forensic analysis, event logs were categorized into normal system baseline operations and potential threat vectors. Below is a structured analysis of observed behaviors:</p>
+        
+        <h3>A. Normal Operational Baseline vs. Suspicious Events</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event Category</th>
+                        <th>Normal Operational Baseline</th>
+                        <th>Identified Suspicious Anomaly</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Authentication</strong></td>
+                        <td>Single successful login attempts by employees during standard working hours (08:00–18:00 IST) from internal corporate IPs (10.0.0.0/8).</td>
+                        <td>High-volume failed login attempts (50+ per minute) targeting administrative accounts (e.g., <code>admin</code>, <code>root</code>) followed by a successful login.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IP Geolocation</strong></td>
+                        <td>Access requests originating from domestic subnet pools or registered VPN corporate egress gateways.</td>
+                        <td>Inbound connection requests from external/unrecognized IP addresses (e.g., <code>185.220.101.5</code> - known Tor Exit Node) targeting administrative SSH/RDP ports.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>User Privileges & Behavior</strong></td>
+                        <td>Users accessing assigned network drives, local HR applications, and standard productivity tools.</td>
+                        <td>Unusual off-hours administrative privilege escalation (e.g., <code>sudo su</code> at 03:15 AM) and mass directory enumeration/data archiving (<code>tar -czvf /tmp/exfil.tar.gz</code>).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Network & System Activity</strong></td>
+                        <td>Standard HTTPS web traffic (ports 80/443) and internal DNS queries to localized corporate domain controllers.</td>
+                        <td>Abnormal outbound traffic spikes over non-standard ports (e.g., TCP 4444) and DNS tunneling queries with long subdomains.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>B. Log Findings Summary</h3>
+        <ul>
+            <li><strong>Brute Force / Credential Stuffing Vector:</strong> Log entries revealed repeated <code>Event ID 4625</code> (Failed log on) occurring rapid-fire from external IP <code>185.220.101.5</code> against account <code>admin_user</code>, followed by <code>Event ID 4624</code> (Successful log on).</li>
+            <li><strong>Anomalous Off-Hours Access:</strong> Administrative credentials were utilized at 03:14:22 AM UTC, outside standard shift rosters, executing privilege escalation routines.</li>
+            <li><strong>Suspicious File Execution:</strong> Execution of obfuscated PowerShell scripts and creation of executable files in <code>c:\Users\Public\AppData\</code>.</li>
+        </ul>
+    </section>
+
+    <!-- 3. Detection Rules -->
+    <section>
+        <h2>3. Detection Logic Rules</h2>
+        <p>To automate detection and reduce response times, custom detection logic rules have been designed for implementation in SIEM solutions (Splunk, Elastic, or Sentinel).</p>
+
+        <div class="rule-card">
+            <div class="rule-title">Rule 1: Multiple Failed Logins Followed by Success (Brute Force Detection)</div>
+            <pre>SELECT source_ip, target_user, COUNT(event_id = 4625) as failed_attempts
+FROM Authentication_Logs
+WHERE time_window = 5_minutes
+GROUP BY source_ip, target_user
+HAVING failed_attempts >= 5
+AND FOLLOWED_BY (event_id = 4624 WHERE source_ip = source_ip AND target_user = target_user);</pre>
+            <div class="justification"><strong>Alert Justification:</strong> Indicates a potential brute-force or credential-guessing attack that successfully breached an account. Immediate notification ensures account lockouts before unauthorized persistence is established.</div>
+        </div>
+
+        <div class="rule-card">
+            <div class="rule-title">Rule 2: Administrative Login from Unknown / External IP</div>
+            <pre>SELECT event_time, user_id, source_ip, location
+FROM Access_Logs
+WHERE user_role IN ('Domain Admin', 'System Administrator', 'root')
+AND source_ip NOT IN (SELECT ip_address FROM Corporate_Trusted_Subnets);</pre>
+            <div class="justification"><strong>Alert Justification:</strong> Administrative access should strictly originate from managed corporate endpoints or VPNs. External administrative logins indicate stolen credentials or unauthorized remote exposure.</div>
+        </div>
+
+        <div class="rule-card">
+            <div class="rule-title">Rule 3: Admin Privilege Escalation at Anomalous Hours</div>
+            <pre>SELECT event_id, user_id, process_name, timestamp
+FROM Security_Events
+WHERE event_type = 'Privilege_Escalation' OR process_name IN ('sudo', 'runas.exe')
+AND TIME(timestamp) BETWEEN '23:00:00' AND '05:00:00'
+AND user_id NOT IN (SELECT user_id FROM On_Call_Schedule);</pre>
+            <div class="justification"><strong>Alert Justification:</strong> Attackers often perform destructive actions or lateral movement during off-peak hours to avoid active monitoring by human analysts.</div>
+        </div>
+
+        <div class="rule-card">
+            <div class="rule-title">Rule 4: High-Frequency Outbound Data Transfer (Data Exfiltration Indicator)</div>
+            <pre>SELECT source_internal_ip, destination_external_ip, SUM(bytes_sent) as total_bytes
+FROM Firewall_Traffic_Logs
+WHERE direction = 'Outbound' AND time_window = 10_minutes
+GROUP BY source_internal_ip, destination_external_ip
+HAVING total_bytes > 500MB;</pre>
+            <div class="justification"><strong>Alert Justification:</strong> Rapid exfiltration of corporate data or archives (e.g., .zip, .tar.gz) often generates distinct high-volume outbound telemetry spikes.</div>
+        </div>
+    </section>
+
+    <!-- 4. Matrix & Lifecycle -->
+    <section>
+        <h2>4. Incident Classification & Response Matrix</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Incident Severity</th>
+                        <th>Activity Description</th>
+                        <th>Potential Impact</th>
+                        <th>Recommended Response Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-high">High Severity</span></td>
+                        <td>Successful Brute Force & External Admin Login</td>
+                        <td>Full host compromise, unauthorized access to sensitive internal systems, domain persistence.</td>
+                        <td>
+                            • Immediately isolate affected host from network.<br>
+                            • Force global password reset for compromised account.<br>
+                            • Block malicious source IP at edge firewall.<br>
+                            • Escalate to L2/L3 SOC Incident Handler.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-med">Medium Severity</span></td>
+                        <td>Off-Hours Admin Escalation & PowerShell Script Execution</td>
+                        <td>Unauthorized configuration changes, potential malware deployment, privilege misuse.</td>
+                        <td>
+                            • Contact user/admin to verify legitimate maintenance.<br>
+                            • Kill suspicious PowerShell processes.<br>
+                            • Collect memory dump & process logs for analysis.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-low">Low Severity</span></td>
+                        <td>Isolated Failed Login Attempts (&lt;5 attempts)</td>
+                        <td>Minimal immediate risk; potential user mistyping password or minor scanning.</td>
+                        <td>
+                            • Log event for trend monitoring.<br>
+                            • Monitor for escalation or multi-account brute force.<br>
+                            • No immediate system containment required.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 5. Lifecycle -->
+    <section>
+        <h2>5. Incident Handling Workflow Life-Cycle</h2>
+        <p>The incident management lifecycle follows the standard NIST SP 800-61 Incident Handling Framework across six primary phases:</p>
+
+        <div class="lifecycle-grid">
+            <div class="step-card">
+                <div class="step-num">1. Detection Phase</div>
+                <p>SIEM generates an alert based on Rule 1 (Brute Force) or Rule 2 (Anomalous IP Admin Login). Log management systems aggregate system logs, firewalls, and endpoint detection agents.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2. Alert Verification & Triage Phase</div>
+                <p>L1 SOC Analyst reviews alert context, verifies source IP reputation, checks timestamp against maintenance schedules, and confirms whether the alert is a true positive or false positive.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3. Investigation Phase</div>
+                <p>Analyst cross-references endpoint logs (EDR), firewall sessions, and Active Directory logs to determine the scope of compromise, lateral movement attempts, and compromised assets.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4. Containment & Response Phase</div>
+                <p>Short-term: Revoke active user sessions, block attacker IP on firewall, and isolate endpoint network segment. Long-term: Apply firewall restriction rules and update endpoint signatures.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">5. Recovery Phase</div>
+                <p>Re-image compromised host from secure backups, reset credentials across Active Directory, restore service operations under enhanced monitoring, and verify system integrity.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">6. Closure & Lessons Learned Phase</div>
+                <p>Document root cause analysis (RCA), update SIEM detection rules to eliminate blind spots, share IOCs with threat intel, and deliver final incident summary report to management.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. Recommendations -->
+    <section>
+        <h2>6. Hardening Recommendations</h2>
+        <ul class="hardening-list">
+            <li><strong>Multi-Factor Authentication (MFA):</strong> Enforce mandatory MFA across all external remote access, VPNs, and administrative portals.</li>
+            <li><strong>Account Lockout Policies:</strong> Implement threshold lockouts (e.g., lock account for 15 minutes after 5 failed attempts) to mitigate brute force risks.</li>
+            <li><strong>Network Segmentation & IP Whitelisting:</strong> Restrict administrative interfaces (RDP, SSH, Management Consoles) to trusted internal management subnets.</li>
+            <li><strong>Least Privilege Enforcement:</strong> Audit administrative accounts regularly and enforce Just-In-Time (JIT) access management.</li>
+        </ul>
+    </section>
+</div>
+
+</body>
+</html>
